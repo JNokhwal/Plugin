@@ -1,2 +1,2 @@
-# Addon
+# Plugin
 Blender Addon
