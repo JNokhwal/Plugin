@@ -64,7 +64,7 @@ patterns = [
         ]
     },
     {
-        "[Oo]cclusion|ao|ambientocclusion|ambient_occlusion": [
+        "[Oo]cclusion|ao|ambientocclusion|ambient_occlusion|AO|Ao": [
             {
                 "category": "occlusion",
                 "shader": "Occlusion",
