@@ -16,17 +16,12 @@ patterns = [
         ]
     },
     {
-
         "[Aa]lbedo([Ss]pec)?|a(s)?|basecolor|BaseColor": [
             {
                 "category": "albedo",
                 "shader": "Albedo",
                 "fields": [
-                    {"Albedo Map": "[name]"},
-                    {"sRGB Color Space" : True},
-                    {"useMipmaps": False}
-
-
+                    {"Albedo Map": "[name]"}
                 ]
             }
         ]
@@ -51,7 +46,7 @@ patterns = [
                 "shader": "Roughness",
                 "fields": [
                     {"Roughness Map": "[name]"},
-                    {"Roughness" : 1.0}
+                    {"Roughness": 1.0}
                 ]
             }
         ]
@@ -63,7 +58,7 @@ patterns = [
                 "shader": "Metalness",
                 "fields": [
                     {"Metalness Map": "[name]"},
-                    {"Metalness" : 1.0}
+                    {"Metalness": 1.0}
                 ]
             }
         ]
@@ -87,28 +82,23 @@ patterns = [
                 "fields": [
                     {"Alpha Map": "[name]"},
                     {"Channel": 0}
-
                 ]
             }
         ]
     }
-
 ]
 
-# File formats
-formats = [
-    "psd",
-    "png",
-    "jpg",
-    "jpeg",
-    "tga",
-    "bmp"
-]
+formats = ["psd", "png", "jpg", "jpeg", "tga", "bmp"]
 
 ###############################################################
 
 # UI Functionality
 window = mset.UIWindow("Select Texture Location Folder")
+
+
+window.addElement(mset.UILabel("\t\t        ---Tech Boy JaTiX---\n"))
+window.addReturn()
+
 
 window.addElement(mset.UILabel("Folder"))
 
@@ -130,8 +120,6 @@ window.addReturn()
 
 ###############################################################
 
-# Gets the search directory from the UI input field
-
 
 def get_search_dir():
     search_dir = ""
@@ -147,97 +135,80 @@ def get_search_dir():
 
     return search_dir
 
-# traverses the folder and attempts to create materials from images.
+###############################################################
 
 
 def create_material():
-
-    # Determine search area
     search_dir = get_search_dir()
-
-    # Group each file according to the suffix portion of their name.
     files = os.listdir(search_dir)
     image_files = []
     prefix_set = set()
 
     for file in files:
-        # If the file format is a texture
         ext = os.path.splitext(file)
-        extMatch = False
-        for f in formats:
-            extMatch = extMatch or "." + f == ext[1]
+        extMatch = any("." + f == ext[1] for f in formats)
 
         if extMatch:
-            # perform regex match to find possible textures
             m = re.search('.*\_', file)
             if m:
                 prefix_set.add(m.group(0))
                 image_files.append(file)
 
-    # Check each prefix in the with `patterns` data structure,
-    # and attempt to match prefixes with subroutine settings.
     for prefix in prefix_set:
         try:
             matName = prefix.replace("_", "")
             mat = None
-    
+
             try:
-                mat = mset.findMaterial(matName)  # Try to find the material
+                mat = mset.findMaterial(matName)
             except Exception as e:
                 print(f"Error finding material '{matName}': {e}")
-    
-            if mat is None:  # Material not found, create new one
+
+            if mat is None:
                 print(f"Material '{matName}' not found. Creating a new material.")
                 mat = mset.Material(name=matName)
-            else:  # Material found, update it
+            else:
                 print(f"Material '{matName}' found. Updating texture channels.")
 
             for item in patterns:
-
                 for suffixRegex in item.keys():
-
                     for file in files:
-
-                        # Match any files that have the suffix or an
-                        # underscore followed by the suffix
                         suffixMatch = re.match(
                             prefix + "((" + suffixRegex + ")|" + prefix + "_" + "(" + suffixRegex + "))\.", file)
-                        # We've found a file for this pattern to use, set
-                        # the material accordingly
                         if suffixMatch:
-
                             for subSettings in item[suffixRegex]:
                                 try:
-                                    # Setting the subroutine according to the
-                                    # specified settings for this match
                                     mat.setSubroutine(
                                         subSettings["category"], subSettings["shader"])
                                     sub = mat.getSubroutine(
                                         subSettings["category"])
 
-                                    # Setting any fields that this subroutine
-                                    # might need
                                     for field in subSettings["fields"]:
                                         for fieldKey, fieldValue in field.items():
                                             try:
-                                                sub.setField(fieldKey, os.path.join(
-                                                    search_dir, file) if fieldValue == "[name]" else fieldValue)
+                                                if fieldValue == "[name]":
+                                                    pth = os.path.join(search_dir, file)
+                                                    tex = mset.Texture(pth)
+
+                                                    if fieldKey == "Albedo Map":
+                                                        tex.sRGB = True
+
+                                                    sub.setField(fieldKey, tex)
+                                                else:
+                                                    sub.setField(fieldKey, fieldValue)
                                             except NameError:
-                                                print("Field '" + fieldKey + "' in subroutine '" +
-                                                      subSettings["shader"] + "' doesn't exist, skipping.")
+                                                print(f"Field '{fieldKey}' in subroutine '{subSettings['shader']}' doesn't exist, skipping.")
                                                 continue
                                 except ReferenceError:
-                                    print(
-                                        "Material Subroutine'" + subSettings["shader"] + "' doesn't exist, skipping.")
+                                    print(f"Material Subroutine '{subSettings['shader']}' doesn't exist, skipping.")
                                     continue
         except NameError:
-            print("Material '" + prefix + "' already exists, skipping.")
+            print(f"Material '{prefix}' already exists, skipping.")
             continue
 
+        print("Available fields for Albedo Shader:", sub.getFieldNames())
+
 ###############################################################
-
-# Finish UI
-
 
 add_button = mset.UIButton("Add")
 add_button.onClick = create_material
