@@ -156,7 +156,7 @@ def create_material():
 
     for prefix in prefix_set:
         try:
-            matName = prefix.replace("_", "")
+            matName = prefix.rstrip("_")
             mat = None
 
             try:
