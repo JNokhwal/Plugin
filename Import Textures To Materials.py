@@ -88,6 +88,92 @@ patterns = [
     }
 ]
 
+patternsSG = [
+    {
+        "[Hh]eight|h": [
+            {
+                "category": "displacement",
+                "shader": "Height",
+                "fields": [
+                    {"Displacement Map": "[name]"},
+                    {"Scale": 0}
+                ]
+            }
+        ]
+    },
+    {
+        "[Aa]lbedo([Ss]pec)?|a(s)?|basecolor|BaseColor|Diffuse|diffuse": [
+            {
+                "category": "albedo",
+                "shader": "Albedo",
+                "fields": [
+                    {"Albedo Map": "[name]"}
+                ]
+            }
+        ]
+    },
+    {
+        "[Nn]ormal|n": [
+            {
+                "category": "surface",
+                "shader": "Normals",
+                "fields": [
+                    {"Normal Map": "[name]"},
+                    {"Object Space": False},
+                    {"Flip Y": True}
+                ]
+            }
+        ]
+    },
+    {
+        "[Gg]lossiness|g": [
+            {
+                "category": "microsurface",
+                "shader": "Gloss",
+                "fields": [
+                    {"Gloss Map": "[name]"},
+                    {"Gloss": 1.0}
+                ]
+            }
+        ]
+    },
+    {
+        "[Ss]pecular|s": [
+            {
+                "category": "reflectivity",
+                "shader": "Specular",
+                "fields": [
+                    {"Specular Map": "[name]"},
+                    {"Intensity": 1.0}
+                ]
+            }
+        ]
+    },
+    {
+        "[Oo]cclusion|ao|ambientocclusion|ambient_occlusion|AO|Ao": [
+            {
+                "category": "occlusion",
+                "shader": "Occlusion",
+                "fields": [
+                    {"Occlusion Map": "[name]"}
+                ]
+            }
+        ]
+    },
+    {
+        "[Tt]ransparency|[Aa]lpha|[Oo]pacity": [
+            {
+                "category": "transparency",
+                "shader": "Dither",
+                "fields": [
+                    {"Alpha Map": "[name]"},
+                    {"Channel": 0}
+                ]
+            }
+        ]
+    }
+]
+
 formats = ["psd", "png", "jpg", "jpeg", "tga", "bmp"]
 
 ###############################################################
@@ -208,10 +294,84 @@ def create_material():
 
         print("Available fields for Albedo Shader:", sub.getFieldNames())
 
+def create_material_SG():
+    search_dir = get_search_dir()
+    files = os.listdir(search_dir)
+    image_files = []
+    prefix_set = set()
+
+    for file in files:
+        ext = os.path.splitext(file)
+        extMatch = any("." + f == ext[1] for f in formats)
+
+        if extMatch:
+            m = re.search('.*\_', file)
+            if m:
+                prefix_set.add(m.group(0))
+                image_files.append(file)
+
+    for prefix in prefix_set:
+        try:
+            matName = prefix.rstrip("_")
+            mat = None
+
+            try:
+                mat = mset.findMaterial(matName)
+            except Exception as e:
+                print(f"Error finding material '{matName}': {e}")
+
+            if mat is None:
+                print(f"Material '{matName}' not found. Creating a new material.")
+                mat = mset.Material(name=matName)
+            else:
+                print(f"Material '{matName}' found. Updating texture channels.")
+
+            for item in patternsSG:
+                for suffixRegex in item.keys():
+                    for file in files:
+                        suffixMatch = re.match(
+                            prefix + "((" + suffixRegex + ")|" + prefix + "_" + "(" + suffixRegex + "))\.", file)
+                        if suffixMatch:
+                            for subSettings in item[suffixRegex]:
+                                try:
+                                    mat.setSubroutine(
+                                        subSettings["category"], subSettings["shader"])
+                                    sub = mat.getSubroutine(
+                                        subSettings["category"])
+
+                                    for field in subSettings["fields"]:
+                                        for fieldKey, fieldValue in field.items():
+                                            try:
+                                                if fieldValue == "[name]":
+                                                    pth = os.path.join(search_dir, file)
+                                                    tex = mset.Texture(pth)
+
+                                                    if fieldKey == "Albedo Map":
+                                                        tex.sRGB = True
+
+                                                    sub.setField(fieldKey, tex)
+                                                else:
+                                                    sub.setField(fieldKey, fieldValue)
+                                            except NameError:
+                                                print(f"Field '{fieldKey}' in subroutine '{subSettings['shader']}' doesn't exist, skipping.")
+                                                continue
+                                except ReferenceError:
+                                    print(f"Material Subroutine '{subSettings['shader']}' doesn't exist, skipping.")
+                                    continue
+        except NameError:
+            print(f"Material '{prefix}' already exists, skipping.")
+            continue
+
+        print("Available fields for Albedo Shader:", sub.getFieldNames())
+
 ###############################################################
 
-add_button = mset.UIButton("Add")
+add_button = mset.UIButton("Add MR")
 add_button.onClick = create_material
+window.addElement(add_button)
+
+add_button = mset.UIButton("Add SG")
+add_button.onClick = create_material_SG
 window.addElement(add_button)
 
 close_button = mset.UIButton("Close")
