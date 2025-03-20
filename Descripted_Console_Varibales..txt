@@ -1,0 +1,119 @@
+1. Anti-Aliasing (TAA) will make edges smoother, reducing jagged lines in your render.
+
+• r.TemporalAASamples=32
+(Higher values provide smoother edges but increase GPU load.)
+
+• r.TemporalAACurrentFrameWeight=0.1
+(Controls the blending weight of temporal anti-aliasing. Lower values reduce ghosting but may flicker.)
+__________________________________________________________________________________________________________
+
+2. Screen Space Reflections (SSR) will provide sharper and more detailed reflections.
+
+• r.SSR.Quality=4
+(Maximum quality for screen space reflections.)
+
+• r.SSR.HalfResSceneColor=0
+(Disable half-resolution rendering for better clarity.)
+__________________________________________________________________________________________________________
+
+3. Shadows will become sharper and more realistic, with greater draw distances and resolution.
+
+• r.ShadowQuality=5
+(Max shadow quality.)
+
+• r.Shadow.MaxResolution=4096
+(Increase shadow resolution for sharper shadows.)
+
+• r.Shadow.DistanceScale=2
+(Increases shadow draw distance.)
+__________________________________________________________________________________________________________
+
+4. Ambient Occlusion (AO) will improve shadowing in crevices and between objects, making lighting look more natural.
+
+• r.AmbientOcclusionLevels=3
+(Defines the number of AO levels.)
+
+• r.AmbientOcclusionRadiusScale=2.0
+(Wider ambient occlusion for softer shadows in crevices.)
+__________________________________________________________________________________________________________
+
+5. Texture Settings will make your textures appear sharper, especially when viewed at an angle or from a distance.
+
+• r.Streaming.MipBias=-3
+(Forces higher-resolution mipmaps.)
+
+• r.MaxAnisotropy=16
+(Maximize anisotropic filtering for sharper textures at oblique angles.)
+__________________________________________________________________________________________________________
+
+6. Lighting Quality & Global Illumination will ensure realistic lighting and reflections, especially if using Lumen.
+
+• r.LightingDetailMode=2
+(Enables full lighting detail.)
+
+• r.HZBOcclusion=1
+(Enables high-quality horizon-based ambient occlusion.)
+
+• r.VolumetricFog=1
+(Enable volumetric fog for better lighting effects.)
+
+• r.Lumen.Reflections.HitLighting=1
+(Ensures that Lumen reflections include hit lighting, resulting in more accurate lighting in reflective surfaces.)
+
+• r.Lumen.Reflections.HierarchicalScreenTraces
+(Enables hierarchical screen traces for Lumen reflections, improving the accuracy and quality of reflections in the scene.)
+__________________________________________________________________________________________________________
+
+7. Depth of Field
+
+• r.DepthOfFieldQuality=4
+(Enables high-quality depth of field.)
+__________________________________________________________________________________________________________
+
+8. Motion Blur
+
+• r.MotionBlurQuality=4
+(Maximize motion blur quality for smoother transitions.)
+__________________________________________________________________________________________________________
+
+9. Post-Processing Effects like bloom, depth of field, and motion blur will have a higher quality and more cinematic appearance.
+
+• r.PostProcessAAQuality=6
+(Improves anti-aliasing quality in post-processing.)
+
+• r.BloomQuality=5
+(Highest bloom quality for cinematic lighting.)
+__________________________________________________________________________________________________________
+
+10. Screen Percentage boosts supersampling for higher pixel density and sharper image clarity.
+
+• r.ScreenPercentage=200
+(Upscale the render to 200% for super-sampling. Adjust based on performance.)
+__________________________________________________________________________________________________________
+
+11. Ray Tracing (if supported) can push reflection, shadow, and global illumination quality even further.
+
+• r.RayTracing.Reflections=1
+(Enables ray-traced reflections, which are more accurate than screen space reflections, for supported hardware.)
+
+• r.RayTracing.Shadows=1
+(Enables ray-traced shadows, improving the accuracy and softness of shadows.)
+
+• r.RayTracing.GlobalIllumination=1
+(Enables ray-traced global illumination for more realistic and dynamic lighting.)
+__________________________________________________________________________________________________________
+
+12. Virtual Textures
+
+• r.VirtualTextures=1
+(Enables virtual textures for better memory management of large textures.)
+
+• r.VT.TileSize=128
+(Increase tile size for sharper textures.)
+__________________________________________________________________________________________________________
+
+13. Frame Rate (optional)
+
+• t.MaxFPS=60 or t.MaxFPS=120
+(Adjust the maximum FPS to balance quality and performance.)
+__________________________________________________________________________________________________________
